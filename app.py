@@ -5,23 +5,29 @@ from bs4 import BeautifulSoup
 app= Flask(__name__) 
 
 @app.route('/')
-
 def home(): 
-    return "<h1> Home </h1>"
+    return "Home" 
 
-@app.route('/<name>') 
-def user(name) : 
-    return f"<h1> Hello {name}! </h1>" 
+@app.route('/page/<int:id>') 
+def bs4(id) : 
+    if id == 1 : url = 'https://viblo.asia/newest' 
+    else : url = f"https://viblo.asia/newest?page={id}"
+    response = requests.get(url)
 
-
-@app.route('/BeautifulSoup') 
-def BeautifulSoup() : 
-    response = requests.get('https://viblo.asia/newest')
     doc = response.text 
 
-    file = io.open('text.txt', mode = 'w' , encoding= 'utf8') 
-    file.write(doc)
-    return doc 
+    soup = BeautifulSoup(doc, 'html.parser')
+
+    urls = list()
+
+    for link in soup.find_all('h3', {'class': 'word-break' }) : 
+
+        link2 = link.find('a')
+
+        urls.append('https://viblo.asia'+ link2['href'])
+ 
+    return urls 
+
 
 if __name__ == "__main__" : 
     app.run()
